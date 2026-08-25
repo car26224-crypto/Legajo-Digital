@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Legajo Digital de Trayectorias Escolares</title>
+
+<style>
+:root{
+    --azul:#17365d;
+    --azul2:#245b8f;
+    --fondo:#eef2f7;
+    --blanco:#ffffff;
+    --texto:#263544;
+    --gris:#64748b;
+    --verde:#198754;
+    --amarillo:#e09f00;
+    --rojo:#c62828;
+    --borde:#d9e1e8;
+}
+
+*{ box-sizing:border-box; }
+
+body{
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    background:var(--fondo);
+    color:var(--texto);
+}
+
+header{
+    background:linear-gradient(135deg,var(--azul),var(--azul2));
+    color:white;
+    padding:18px 22px;
+    position:sticky;
+    top:0;
+    z-index:20;
+    box-shadow:0 2px 10px #0003;
+}
+
+header h1{ margin:0; font-size:22px; }
+header p{ margin:5px 0 0; opacity:.9; }
+
+.app{ display:flex; min-height:calc(100vh - 80px); }
+
+nav{
+    width:245px;
+    background:#102a43;
+    padding:14px;
+    flex-shrink:0;
+}
+
+nav button{
+    width:100%;
+    text-align:left;
+    border:0;
+    background:transparent;
+    color:white;
+    padding:12px;
+    margin:2px 0;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+nav button:hover, nav button.active{ background:#ffffff1c; }
+
+main{
+    flex:1;
+    width:100%;
+    max-width:1500px;
+    margin:auto;
+    padding:20px;
+}
+
+.view{ display:none; }
+.view.active{ display:block; }
+
+.card{
+    background:white;
+    border:1px solid var(--borde);
+    border-radius:12px;
+    padding:18px;
+    margin-bottom:16px;
+    box-shadow:0 2px 8px #0000000c;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+    gap:14px;
+}
+
+.stat{ font-size:30px; font-weight:bold; margin-top:6px; }
+.muted{ color:var(--gris); font-size:13px; }
+
+.formgrid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+    gap:12px;
+}
+
+label{ display:block; font-size:13px; font-weight:bold; margin:7px 0 4px; }
+
+input, select, textarea{
+    width:100%;
+    padding:10px;
+    border:1px solid var(--borde);
+    border-radius:8px;
+    font:inherit;
+    background:white;
+}
+
+textarea{ min-height:90px; resize:vertical; }
+
+button{
+    border:0;
+    border-radius:8px;
+    padding:10px 14px;
+    background:#2563eb;
+    color:white;
+    cursor:pointer;
+    margin:3px;
+}
+
+button:hover{ opacity:.87; }
+button.success{ background:var(--verde); }
+button.warning{ background:var(--amarillo); }
+button.danger{ background:var(--rojo); }
+button.secondary{ background:#64748b; }
+button.light{ background:#e8eef5; color:#263544; }
+
+.toolbar{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:15px; }
+
+.tablewrap{ overflow:auto; }
+
+table{ width:100%; border-collapse:collapse; background:white; }
+
+th, td{
+    border-bottom:1px solid var(--borde);
+    padding:9px;
+    text-align:left;
+    font-size:13px;
+    vertical-align:top;
+}
+
+th{ background:#f3f6f9; }
+
+.badge{
+    display:inline-block;
+    padding:5px 9px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:bold;
+}
+
+.ok{ background:#d8f3dc; color:#146c2e; }
+.warn{ background:#fff1c2; color:#805b00; }
+.bad{ background:#ffd9dc; color:#a51d2a; }
+.neutral{ background:#e7edf4; color:#475569; }
+
+.student{ display:flex; gap:15px; align-items:center; }
+
+.avatar{
+    width:75px;
+    height:75px;
+    border-radius:50%;
+    object-fit:cover;
+    background:#dfe7ef;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:32px;
+    flex-shrink:0;
+}
+
+.studentgrid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:14px;
+}
+
+.timeline{ border-left:4px solid #8fb3d8; padding-left:15px; }
+
+.event{
+    background:#f8fafc;
+    border:1px solid var(--borde);
+    border-radius:9px;
+    padding:12px;
+    margin-bottom:12px;
+}
+
+.modal{
+    position:fixed;
+    inset:0;
+    background:#0008;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:100;
+    padding:15px;
+}
+
+.modal.open{ display:flex; }
+
+.modalbox{
+    background:white;
+    width:100%;
+    max-width:1100px;
+    max-height:94vh;
+    overflow:auto;
+    border-radius:14px;
+    padding:20px;
+}
+
+.tabs{ display:flex; flex-wrap:wrap; gap:5px; margin-bottom:15px; }
+.tabs button{ background:#e8eef5; color:#263544; }
+.tabs button.active{ background:var(--azul); color:white; }
+
+.alert{
+    padding:12px;
+    background:#fff3cd;
+    border:1px solid #ffe69c;
+    border-radius:8px;
+    margin-bottom:12px;
+}
+
+.photo{
+    width:140px;
+    height:140px;
+    object-fit:cover;
+    border-radius:10px;
+    border:1px solid var(--borde);
+    background:#eef2f7;
+}
+
+.yearbox{
+    border:1px solid var(--borde);
+    border-radius:10px;
+    margin-bottom:14px;
+    overflow:hidden;
+}
+
+.yeartitle{
+    background:var(--azul);
+    color:white;
+    padding:10px 14px;
+    font-weight:bold;
+}
+
+.yearbody{ padding:12px; }
+
+.subjectbox{
+    border:1px solid var(--borde);
+    border-radius:8px;
+    padding:10px;
+    margin-bottom:8px;
+}
+
+.trimesters{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+}
+
+.smallnote{ font-size:11px; color:var(--gris); }
+
+@media(max-width:800px){
+    .app{ display:block; }
+    nav{ width:100%; display:flex; overflow:auto; position:sticky; top:70px; z-index:15; }
+    nav button{ width:auto; white-space:nowrap; }
+    main{ padding:12px; }
+    .trimesters{ grid-template-columns:1fr; }
+}
+
+@media print{
+    header, nav, .no-print, button{ display:none!important; }
+    .app{ display:block; }
+    main{ padding:0; }
+    .card{ box-shadow:none; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>📘 LEGAJO DIGITAL DE TRAYECTORIAS ESCOLARES</h1>
+  <p>Sistema offline de seguimiento para el docente tutor</p>
+</header>
+
+<div class="app">
+  <nav>
+    <button class="nav active" data-view="inicio">🏠 Inicio</button>
+    <button class="nav" data-view="institucion">🏫 Institución / Curso</button>
+    <button class="nav" data-view="alumnos">👥 Alumnos</button>
+    <button class="nav" data-view="asistencia">📅 Asistencia</button>
+    <button class="nav" data-view="trayectoria">📚 Trayectoria 1.º–6.º</button>
+    <button class="nav" data-view="adeudadas">⚠️ Espacios adeudados</button>
+    <button class="nav" data-view="tutoria">🧑‍🏫 Tutoría</button>
+    <button class="nav" data-view="respaldo">💾 Respaldo</button>
+  </nav>
+
+  <main>
+    <!-- INICIO -->
+    <section id="inicio" class="view active">
+      <div class="toolbar">
+        <button onclick="abrirAlumno()">➕ Nuevo alumno</button>
+        <button class="secondary" onclick="abrirSeleccionAlumno()">🔎 Buscar alumno</button>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <div class="muted">Alumnos registrados</div>
+          <div class="stat" id="totalAlumnos">0</div>
+        </div>
+        <div class="card">
+          <div class="muted">🟢 Trayectorias sostenidas</div>
+          <div class="stat" id="trayectoriasOk">0</div>
+        </div>
+        <div class="card">
+          <div class="muted">🟡 En seguimiento</div>
+          <div class="stat" id="trayectoriasWarn">0</div>
+        </div>
+        <div class="card">
+          <div class="muted">🔴 Con dificultades</div>
+          <div class="stat" id="trayectoriasBad">0</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INSTITUCION -->
+    <section id="institucion" class="view">
+      <div class="card">
+        <h2>🏫 Registro de Instituciones</h2>
+        <p class="muted">Añada instituciones para asignarlas individualmente a los alumnos.</p>
+        <div class="formgrid">
+          <div>
+            <label>Nombre de la Escuela / Institución</label>
+            <input id="nuevaEscuela" placeholder="Ej: Escuela Secundaria Nueva Trinidad">
+          </div>
+          <div>
+            <label>Sede / Anexo</label>
+            <input id="nuevaSede" placeholder="Ej: Sede Central / Anexo 1">
+          </div>
+        </div>
+        <br>
+        <button class="success" onclick="guardarNuevaInstitucion()">💾 Agregar Institución</button>
+      </div>
+
+      <div class="card">
+        <h3>Instituciones Registradas</h3>
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Escuela</th>
+                <th>Sede</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tablaInstituciones"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ALUMNOS -->
+    <section id="alumnos" class="view">
+      <div class="card">
+        <div class="toolbar">
+          <input id="buscarAlumno" placeholder="Buscar por apellido, nombre o DNI..." oninput="mostrarAlumnos()" style="min-width:220px">
+          <select id="filtroEstado" onchange="mostrarAlumnos()">
+            <option value="">Todos los estados</option>
+            <option value="sostenida">🟢 Trayectoria sostenida</option>
+            <option value="seguimiento">🟡 En seguimiento</option>
+            <option value="dificultades">🔴 Con dificultades</option>
+          </select>
+          <select id="filtroInstitucion" onchange="mostrarAlumnos()">
+            <option value="">Todas las Instituciones</option>
+          </select>
+          <select id="filtroCurso" onchange="mostrarAlumnos()">
+            <option value="">Todos los cursos</option>
+          </select>
+          <button onclick="abrirAlumno()">➕ Nuevo alumno</button>
+        </div>
+        <div id="listaAlumnos" class="studentgrid"></div>
+      </div>
+    </section>
+
+    <!-- ASISTENCIA -->
+    <section id="asistencia" class="view">
+      <div class="card">
+        <h2>📅 Control de Asistencia</h2>
+        <div class="formgrid">
+          <div>
+            <label>Alumno</label>
+            <select id="asistAlumno"></select>
+          </div>
+          <div>
+            <label>Fecha</label>
+            <input type="date" id="asistFecha">
+          </div>
+          <div>
+            <label>Estado</label>
+            <select id="asistEstado">
+              <option value="Presente">Presente</option>
+              <option value="Ausente">Ausente</option>
+              <option value="Justificado">Ausente Justificado</option>
+              <option value="Tardanza">Tardanza</option>
+            </select>
+          </div>
+        </div>
+        <br>
+        <button class="success" onclick="guardarAsistencia()">💾 Registrar Asistencia</button>
+      </div>
+      <div class="card">
+        <h3>Historial de Asistencia</h3>
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Alumno</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tablaAsistencia"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRAYECTORIA -->
+    <section id="trayectoria" class="view">
+      <div class="card">
+        <h2>📚 Trayectoria académica 1.º a 6.º año</h2>
+        <div class="formgrid">
+          <div>
+            <label>Alumno</label>
+            <select id="trayAlumno" onchange="mostrarTrayectoria()"></select>
+          </div>
+        </div>
+      </div>
+      <div id="trayectoriaAlumno"></div>
+    </section>
+
+    <!-- ESPACIOS ADEUDADOS -->
+    <section id="adeudadas" class="view">
+      <div class="card">
+        <h2>⚠️ Espacios Curriculares Adeudados / Pendientes</h2>
+        <div class="formgrid">
+          <div>
+            <label>Alumno</label>
+            <select id="adeudAlumno"></select>
+          </div>
+          <div>
+            <label>Materia Adeudada</label>
+            <input id="adeudMateria" placeholder="Ej: Matemática (2.º Año)">
+          </div>
+          <div>
+            <label>Condición / Estado</label>
+            <select id="adeudEstado">
+              <option value="Pendiente">Pendiente de Acreditación</option>
+              <option value="En Proceso">En Plan de Apoyo / Tutoría</option>
+              <option value="Acreditada">Acreditada / Aprobada</option>
+            </select>
+          </div>
+        </div>
+        <br>
+        <button class="success" onclick="guardarAdeudada()">💾 Registrar Materia Adeudada</button>
+      </div>
+      <div class="card">
+        <h3>Listado de Espacios Adeudados</h3>
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Alumno</th>
+                <th>Materia Adeudada</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tablaAdeudadas"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TUTORIA -->
+    <section id="tutoria" class="view">
+      <div class="card">
+        <h2>🧑‍🏫 Registro de Tutorías y Entrevistas</h2>
+        <div class="formgrid">
+          <div>
+            <label>Alumno</label>
+            <select id="tutoriaAlumno"></select>
+          </div>
+          <div>
+            <label>Fecha</label>
+            <input type="date" id="tutoriaFecha">
+          </div>
+          <div>
+            <label>Tipo de Intervención</label>
+            <select id="tutoriaTipo">
+              <option value="Entrevista Alumno">Entrevista con el Alumno</option>
+              <option value="Reunión Tutor/Tutora">Reunión con Tutor/Adulto Responsable</option>
+              <option value="Acuerdo Pedagógico">Acuerdo Pedagógico / Compromiso</option>
+              <option value="Observación Docente">Observación / Nota General</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label>Observaciones / Compromisos asumidos</label>
+          <textarea id="tutoriaNotas" placeholder="Detalle los temas tratados y los acuerdos establecidos..."></textarea>
+        </div>
+        <br>
+        <button class="success" onclick="guardarTutoria()">💾 Registrar Tutoría</button>
+      </div>
+      <div class="card">
+        <h3>Historial de Intervenciones de Tutoría</h3>
+        <div id="historialTutorias" class="timeline"></div>
+      </div>
+    </section>
+
+    <!-- RESPALDO -->
+    <section id="respaldo" class="view">
+      <div class="card">
+        <h2>💾 Copia de seguridad</h2>
+        <div class="alert">
+          <strong>Importante:</strong> Los datos se guardan en el almacenamiento local del navegador. Realice copias de seguridad periódicamente.
+        </div>
+        <div class="toolbar">
+          <button class="success" onclick="exportarDatos()">📥 Exportar copia</button>
+          <button class="secondary" onclick="document.getElementById('archivoImportar').click()">📤 Importar copia</button>
+          <input type="file" id="archivoImportar" accept=".json" style="display:none" onchange="importarDatos(event)">
+          <button class="danger" onclick="borrarTodo()">⚠️ Borrar todos los datos</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- MODAL -->
+<div id="modal" class="modal">
+  <div class="modalbox">
+    <div id="modalContenido"></div>
+  </div>
+</div>
+
+<script>
+const CLAVE = "legajo_trayectorias_v2_2026";
+
+let db = JSON.parse(
+    localStorage.getItem(CLAVE) || JSON.stringify({
+        instituciones: [],
+        alumnos: [],
+        asistencia: [],
+        calificaciones: [],
+        adeudadas: [],
+        tutorias: []
+    })
+);
+
+let alumnoActual = null;
+
+// Compatibilidad con versiones anteriores del legajo.
+db.alumnos.forEach(a => {
+    if (!a.trayectoria) a.trayectoria = {};
+    if (a.anoActual && !CURSOS_SECCIONES.includes(a.anoActual)) {
+        const m = String(a.anoActual).match(/^(\\d).*?"([A-D])"/);
+        if (m) a.anoActual = `${m[1]}${m[2]}`;
+        else if (/^[1-6][A-E]$/.test(a.anoActual)) a.anoActual = a.anoActual.replace("E", "D");
+    }
+});
+
+
+// Divisiones oficiales disponibles: 1A a 6D
+const DIVISIONES = ["A", "B", "C", "D"];
+const CURSOS_SECCIONES = [];
+for (let y = 1; y <= 6; y++) {
+    DIVISIONES.forEach(s => CURSOS_SECCIONES.push(`${y}${s}`));
+}
+
+// Devuelve el año numérico de una división (ej.: "3B" -> 3)
+function obtenerAnio(curso) {
+    return parseInt(String(curso || "").match(/^\\d+/)?.[0] || "0", 10);
+}
+
+// Devuelve una etiqueta amigable (ej.: "3B" -> "3.º Año B")
+function etiquetaCurso(curso) {
+    const m = String(curso || "").match(/^(\\d)([A-D])$/);
+    return m ? `${m[1]}.º Año "${m[2]}"` : curso || "";
+}
+
+function guardar() {
+    localStorage.setItem(CLAVE, JSON.stringify(db));
+    actualizarTodo();
+}
+
+function id() {
+    return Date.now().toString() + Math.random().toString(36).substring(2, 8);
+}
+
+function estadoBadge(e) {
+    if (e === "sostenida") return `<span class="badge ok">🟢 Trayectoria sostenida</span>`;
+    if (e === "seguimiento") return `<span class="badge warn">🟡 En seguimiento</span>`;
+    return `<span class="badge bad">🔴 Con dificultades</span>`;
+}
+
+function cerrarModal() {
+    document.getElementById("modal").classList.remove("open");
+}
+
+/* NAVEGACION */
+document.querySelectorAll(".nav").forEach(boton => {
+    boton.onclick = function() {
+        document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+        document.getElementById(this.dataset.view).classList.add("active");
+        document.querySelectorAll(".nav").forEach(x => x.classList.remove("active"));
+        this.classList.add("active");
+        actualizarTodo();
+    };
+});
+
+/* INSTITUCIONES MULTIPLES */
+function guardarNuevaInstitucion() {
+    let esc = document.getElementById("nuevaEscuela").value.trim();
+    let sede = document.getElementById("nuevaSede").value.trim();
+    if (!esc) {
+        alert("El nombre de la institución es obligatorio.");
+        return;
+    }
+    db.instituciones.push({ id: id(), escuela: esc, sede: sede || "Sede Principal" });
+    document.getElementById("nuevaEscuela").value = "";
+    document.getElementById("nuevaSede").value = "";
+    guardar();
+}
+
+function eliminarInstitucion(idInst) {
+    if (confirm("¿Desea eliminar esta institución? Los alumnos conservarán el registro del texto, pero no aparecerá en el menú activo.")) {
+        db.instituciones = db.instituciones.filter(x => x.id !== idInst);
+        guardar();
+    }
+}
+
+function mostrarInstituciones() {
+    let tbody = document.getElementById("tablaInstituciones");
+    if (!tbody) return;
+    tbody.innerHTML = db.instituciones.length ? db.instituciones.map(i => `
+        <tr>
+            <td>${i.escuela}</td>
+            <td>${i.sede}</td>
+            <td><button class="danger" onclick="eliminarInstitucion('${i.id}')">🗑️ Eliminar</button></td>
+        </tr>
+    `).join("") : `<tr><td colspan="3" class="muted">No hay instituciones registradas.</td></tr>`;
+}
+
+/* ALUMNOS Y ELIMINACIÓN PERMANENTE */
+function abrirAlumno(idAlumno = null) {
+    let a = idAlumno ? db.alumnos.find(x => x.id === idAlumno) : null;
+
+    let instOptions = db.instituciones.map(i => 
+        `<option value="${i.escuela} (${i.sede})" ${a?.institucion === (i.escuela + " (" + i.sede + ")") ? "selected" : ""}>
+            ${i.escuela} (${i.sede})
+        </option>`
+    ).join("");
+
+    let anoOptions = CURSOS_SECCIONES.map(x => 
+        `<option ${x === a?.anoActual ? "selected" : ""}>${x}</option>`
+    ).join("");
+
+    document.getElementById("modalContenido").innerHTML = `
+        <h2>${a ? "✏️ Editar alumno" : "➕ Nuevo alumno"}</h2>
+        <div class="formgrid">
+            <div><label>Apellido *</label><input id="fApellido" value="${a?.apellido || ""}"></div>
+            <div><label>Nombre *</label><input id="fNombre" value="${a?.nombre || ""}"></div>
+            <div><label>DNI *</label><input id="fDni" value="${a?.dni || ""}"></div>
+            <div>
+                <label>Institución Escolar</label>
+                <select id="fInstitucion">
+                    <option value="">Seleccionar Institución...</option>
+                    ${instOptions}
+                </select>
+            </div>
+            <div><label>Curso y División actual</label>
+                <select id="fAnoActual">
+                    ${anoOptions}
+                </select>
+            </div>
+            <div><label>Estado de trayectoria</label>
+                <select id="fEstado">
+                    <option value="sostenida" ${a?.estado === "sostenida" ? "selected" : ""}>🟢 Trayectoria sostenida</option>
+                    <option value="seguimiento" ${a?.estado === "seguimiento" ? "selected" : ""}>🟡 En seguimiento</option>
+                    <option value="dificultades" ${a?.estado === "dificultades" ? "selected" : ""}>🔴 Con dificultades</option>
+                </select>
+            </div>
+        </div>
+        <br>
+        <div class="toolbar">
+            <button class="success" onclick="guardarAlumno('${idAlumno || ""}')">💾 Guardar alumno</button>
+            <button class="secondary" onclick="cerrarModal()">Cancelar</button>
+            ${a ? `<button class="danger" onclick="eliminarAlumno('${a.id}')">🗑️ Eliminar alumno de forma permanente</button>` : ""}
+        </div>
+    `;
+    document.getElementById("modal").classList.add("open");
+}
+
+function abrirSeleccionAlumno() {
+    let q = prompt("Ingrese Nombre, Apellido o DNI a buscar:");
+    if (q) {
+        document.getElementById("buscarAlumno").value = q;
+        document.querySelectorAll(".nav").forEach(v => v.classList.remove("active"));
+        document.querySelector('[data-view="alumnos"]').classList.add("active");
+        document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+        document.getElementById("alumnos").classList.add("active");
+        mostrarAlumnos();
+    }
+}
+
+function guardarAlumno(idAlumno) {
+    let apellido = document.getElementById("fApellido").value.trim();
+    let nombre = document.getElementById("fNombre").value.trim();
+    let dni = document.getElementById("fDni").value.trim();
+
+    if (!apellido || !nombre || !dni) {
+        alert("Apellido, Nombre y DNI son obligatorios.");
+        return;
+    }
+
+    let a = idAlumno ? db.alumnos.find(x => x.id === idAlumno) : { id: id() };
+    a.apellido = apellido;
+    a.nombre = nombre;
+    a.dni = dni;
+    a.institucion = document.getElementById("fInstitucion").value || "Sin institución asignada";
+    a.anoActual = document.getElementById("fAnoActual").value;
+    a.estado = document.getElementById("fEstado").value;
+    if (!a.trayectoria) a.trayectoria = {};
+
+    if (!idAlumno) db.alumnos.push(a);
+
+    guardar();
+    cerrarModal();
+}
+
+function eliminarAlumno(idAlumno) {
+    let a = db.alumnos.find(x => x.id === idAlumno);
+    if (!a) return;
+
+    if (confirm(`⚠️ ¿Está seguro que desea ELIMINAR PERMANENTEMENTE al alumno ${a.apellido}, ${a.nombre}? Esta acción NO se puede deshacer.`)) {
+        db.alumnos = db.alumnos.filter(x => x.id !== idAlumno);
+        db.asistencia = db.asistencia.filter(x => x.alumno !== idAlumno);
+        db.calificaciones = db.calificaciones.filter(x => x.alumno !== idAlumno);
+        db.adeudadas = db.adeudadas.filter(x => x.alumno !== idAlumno);
+        db.tutorias = db.tutorias.filter(x => x.alumno !== idAlumno);
+
+        guardar();
+        cerrarModal();
+        alert("El registro del alumno y todos sus datos vinculados fueron eliminados de forma permanente.");
+    }
+}
+
+function mostrarAlumnos() {
+    let q = (document.getElementById("buscarAlumno")?.value || "").toLowerCase();
+    let filtroE = document.getElementById("filtroEstado")?.value || "";
+    let filtroI = document.getElementById("filtroInstitucion")?.value || "";
+    let filtroC = document.getElementById("filtroCurso")?.value || "";
+
+    let lista = db.alumnos.filter(a =>
+        (a.apellido + " " + a.nombre + " " + a.dni).toLowerCase().includes(q) &&
+        (!filtroE || a.estado === filtroE) &&
+        (!filtroI || a.institucion === filtroI) &&
+        (!filtroC || a.anoActual === filtroC)
+    ).sort((a,b) => a.apellido.localeCompare(b.apellido));
+
+    let cont = document.getElementById("listaAlumnos");
+    if (!cont) return;
+
+    cont.innerHTML = lista.length ? lista.map(a => `
+        <div class="card student">
+            <div class="avatar">👤</div>
+            <div>
+                <h3>${a.apellido}, ${a.nombre}</h3>
+                <p class="muted">
+                    DNI: ${a.dni}<br>
+                    <b>Escuela:</b> ${a.institucion || "No asignada"}<br>
+                    <b>Año / Sección:</b> ${a.anoActual}
+                </p>
+                <p>${estadoBadge(a.estado)}</p>
+                <button class="light" onclick="abrirAlumno('${a.id}')">✏️ Editar / Eliminar</button>
+            </div>
+        </div>
+    `).join("") : `<div class="card">No hay alumnos registrados.</div>`;
+}
+
+function actualizarFiltroInstituciones() {
+    let select = document.getElementById("filtroInstitucion");
+    if (!select) return;
+    let actual = select.value;
+    select.innerHTML = `<option value="">Todas las Instituciones</option>` + 
+        db.instituciones.map(i => `<option value="${i.escuela} (${i.sede})">${i.escuela} (${i.sede})</option>`).join("");
+    select.value = actual;
+}
+
+function actualizarFiltroCursos() {
+    const select = document.getElementById("filtroCurso");
+    if (!select) return;
+    const actual = select.value;
+    select.innerHTML = `<option value="">Todos los cursos</option>` +
+        CURSOS_SECCIONES.map(c => `<option value="${c}">${etiquetaCurso(c)}</option>`).join("");
+    select.value = actual;
+}
+
+function cargarSelectsAlumnos() {
+    let selects = ["asistAlumno", "trayAlumno", "adeudAlumno", "tutoriaAlumno"];
+    let options = `<option value="">Seleccionar Alumno...</option>` + 
+        db.alumnos.map(a => `<option value="${a.id}">${a.apellido}, ${a.nombre} (${a.anoActual})</option>`).join("");
+    
+    selects.forEach(sId => {
+        let el = document.getElementById(sId);
+        if (el) {
+            let val = el.value;
+            el.innerHTML = options;
+            el.value = val;
+        }
+    });
+}
+
+/* ASISTENCIA */
+function guardarAsistencia() {
+    let alId = document.getElementById("asistAlumno").value;
+    let fecha = document.getElementById("asistFecha").value;
+    let estado = document.getElementById("asistEstado").value;
+
+    if (!alId || !fecha) {
+        alert("Seleccione un alumno y una fecha.");
+        return;
+    }
+
+    db.asistencia.push({ id: id(), alumno: alId, fecha, estado });
+    guardar();
+    mostrarAsistencia();
+}
+
+function eliminarAsistencia(aId) {
+    db.asistencia = db.asistencia.filter(x => x.id !== aId);
+    guardar();
+    mostrarAsistencia();
+}
+
+function mostrarAsistencia() {
+    let tbody = document.getElementById("tablaAsistencia");
+    if (!tbody) return;
+    
+    tbody.innerHTML = db.asistencia.length ? db.asistencia.map(a => {
+        let al = db.alumnos.find(x => x.id === a.alumno);
+        return `
+            <tr>
+                <td>${a.fecha}</td>
+                <td>${al ? al.apellido + ", " + al.nombre : "Alumno Eliminado"}</td>
+                <td><span class="badge ${a.estado === 'Presente' ? 'ok' : 'bad'}">${a.estado}</span></td>
+                <td><button class="danger" onclick="eliminarAsistencia('${a.id}')">🗑️</button></td>
+            </tr>
+        `;
+    }).join("") : `<tr><td colspan="4" class="muted">Sin registros de asistencia.</td></tr>`;
+}
+
+/* TRAYECTORIA ACADÉMICA */
+function mostrarTrayectoria() {
+    let alId = document.getElementById("trayAlumno").value;
+    let cont = document.getElementById("trayectoriaAlumno");
+    if (!cont) return;
+
+    if (!alId) {
+        cont.innerHTML = `<div class="card">Seleccione un alumno para visualizar su trayectoria.</div>`;
+        return;
+    }
+
+    let al = db.alumnos.find(x => x.id === alId);
+    if (!al) return;
+
+    if (!al.trayectoria) al.trayectoria = {};
+
+    let html = `<div class="card">
+        <h3>Trayectoria de ${al.apellido}, ${al.nombre}</h3>
+        <p class="muted"><b>Curso actual:</b> ${etiquetaCurso(al.anoActual)}</p>
+        <p class="smallnote">Cada año conserva su división correspondiente y sus registros trimestrales. Los datos se guardan automáticamente en este legajo.</p>`;
+
+    for (let y = 1; y <= 6; y++) {
+        // Si el alumno cursó otro año/división anteriormente, se puede seleccionar.
+        const cursoDefault = al.trayectoria[y]?.curso || (y === obtenerAnio(al.anoActual) ? al.anoActual : `${y}A`);
+        const curso = CURSOS_SECCIONES.filter(c => obtenerAnio(c) === y);
+        const t = al.trayectoria[y] || {};
+        html += `
+            <div class="yearbox">
+                <div class="yeartitle">${y}.º Año Escolar</div>
+                <div class="yearbody">
+                    <div class="formgrid">
+                        <div>
+                            <label>División</label>
+                            <select id="trayCurso_${y}">
+                                ${curso.map(c => `<option value="${c}" ${c === cursoDefault ? "selected" : ""}>${etiquetaCurso(c)}</option>`).join("")}
+                            </select>
+                        </div>
+                        <div>
+                            <label>Condición anual</label>
+                            <select id="trayCond_${y}">
+                                <option value="" ${!t.condicion ? "selected" : ""}>Sin registrar</option>
+                                <option value="Promovido" ${t.condicion === "Promovido" ? "selected" : ""}>Promovido</option>
+                                <option value="En proceso" ${t.condicion === "En proceso" ? "selected" : ""}>En proceso</option>
+                                <option value="No promovido" ${t.condicion === "No promovido" ? "selected" : ""}>No promovido</option>
+                                <option value="Egresado" ${t.condicion === "Egresado" ? "selected" : ""}>Egresado</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="trimesters">
+                        <div class="subjectbox"><strong>1.º Trimestre:</strong>
+                            <input id="trayT1_${y}" type="text" value="${t.t1 || ""}" placeholder="Notas / observaciones">
+                        </div>
+                        <div class="subjectbox"><strong>2.º Trimestre:</strong>
+                            <input id="trayT2_${y}" type="text" value="${t.t2 || ""}" placeholder="Notas / observaciones">
+                        </div>
+                        <div class="subjectbox"><strong>3.º Trimestre:</strong>
+                            <input id="trayT3_${y}" type="text" value="${t.t3 || ""}" placeholder="Notas / observaciones">
+                        </div>
+                    </div>
+                    <div>
+                        <label>Observaciones del año</label>
+                        <textarea id="trayObs_${y}" placeholder="Promoción, repitencia, cambios de división, situaciones relevantes...">${t.obs || ""}</textarea>
+                    </div>
+                </div>
+            </div>`;
+    }
+
+    html += `<div class="toolbar no-print">
+        <button class="success" onclick="guardarTrayectoria('${al.id}')">💾 Guardar trayectoria completa</button>
+        <button class="secondary" onclick="window.print()">🖨️ Imprimir legajo</button>
+    </div></div>`;
+    cont.innerHTML = html;
+}
+
+function guardarTrayectoria(alId) {
+    const al = db.alumnos.find(x => x.id === alId);
+    if (!al) return;
+    if (!al.trayectoria) al.trayectoria = {};
+
+    for (let y = 1; y <= 6; y++) {
+        al.trayectoria[y] = {
+            curso: document.getElementById(`trayCurso_${y}`).value,
+            condicion: document.getElementById(`trayCond_${y}`).value,
+            t1: document.getElementById(`trayT1_${y}`).value.trim(),
+            t2: document.getElementById(`trayT2_${y}`).value.trim(),
+            t3: document.getElementById(`trayT3_${y}`).value.trim(),
+            obs: document.getElementById(`trayObs_${y}`).value.trim()
+        };
+    }
+
+    guardar();
+    alert("Trayectoria académica guardada correctamente.");
+}
+
+/* ESPACIOS ADEUDADOS */
+function guardarAdeudada() {
+    let alId = document.getElementById("adeudAlumno").value;
+    let mat = document.getElementById("adeudMateria").value.trim();
+    let est = document.getElementById("adeudEstado").value;
+
+    if (!alId || !mat) {
+        alert("Seleccione un alumno e ingrese la materia.");
+        return;
+    }
+
+    db.adeudadas.push({ id: id(), alumno: alId, materia: mat, estado: est });
+    document.getElementById("adeudMateria").value = "";
+    guardar();
+    mostrarAdeudadas();
+}
+
+function eliminarAdeudada(aId) {
+    db.adeudadas = db.adeudadas.filter(x => x.id !== aId);
+    guardar();
+    mostrarAdeudadas();
+}
+
+function mostrarAdeudadas() {
+    let tbody = document.getElementById("tablaAdeudadas");
+    if (!tbody) return;
+
+    tbody.innerHTML = db.adeudadas.length ? db.adeudadas.map(a => {
+        let al = db.alumnos.find(x => x.id === a.alumno);
+        return `
+            <tr>
+                <td>${al ? al.apellido + ", " + al.nombre : "Alumno Eliminado"}</td>
+                <td>${a.materia}</td>
+                <td><span class="badge ${a.estado === 'Acreditada' ? 'ok' : 'warn'}">${a.estado}</span></td>
+                <td><button class="danger" onclick="eliminarAdeudada('${a.id}')">🗑️</button></td>
+            </tr>
+        `;
+    }).join("") : `<tr><td colspan="4" class="muted">No hay materias adeudadas registradas.</td></tr>`;
+}
+
+/* TUTORIA */
+function guardarTutoria() {
+    let alId = document.getElementById("tutoriaAlumno").value;
+    let fecha = document.getElementById("tutoriaFecha").value;
+    let tipo = document.getElementById("tutoriaTipo").value;
+    let notas = document.getElementById("tutoriaNotas").value.trim();
+
+    if (!alId || !fecha || !notas) {
+        alert("Complete todos los campos requeridos.");
+        return;
+    }
+
+    db.tutorias.push({ id: id(), alumno: alId, fecha, tipo, notas });
+    document.getElementById("tutoriaNotas").value = "";
+    guardar();
+    mostrarTutorias();
+}
+
+function eliminarTutoria(tId) {
+    db.tutorias = db.tutorias.filter(x => x.id !== tId);
+    guardar();
+    mostrarTutorias();
+}
+
+function mostrarTutorias() {
+    let cont = document.getElementById("historialTutorias");
+    if (!cont) return;
+
+    cont.innerHTML = db.tutorias.length ? db.tutorias.map(t => {
+        let al = db.alumnos.find(x => x.id === t.alumno);
+        return `
+            <div class="event">
+                <div style="display:flex; justify-content:space-between;">
+                    <strong>${al ? al.apellido + ", " + al.nombre : "Alumno Eliminado"}</strong>
+                    <span class="muted">${t.fecha}</span>
+                </div>
+                <div><span class="badge neutral">${t.tipo}</span></div>
+                <p style="margin:8px 0 0 0;">${t.notas}</p>
+                <div style="text-align:right;">
+                    <button class="danger" onclick="eliminarTutoria('${t.id}')">🗑️ Eliminar</button>
+                </div>
+            </div>
+        `;
+    }).join("") : `<div class="muted">No hay intervenciones registradas.</div>`;
+}
+
+/* RESPALDO Y EXPORTACIÓN */
+function exportarDatos() {
+    let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
+    let dlAnchorElem = document.createElement('a');
+    dlAnchorElem.setAttribute("href", dataStr);
+    dlAnchorElem.setAttribute("download", `legajo_respaldo_${new Date().toISOString().slice(0,10)}.json`);
+    dlAnchorElem.click();
+}
+
+function importarDatos(e) {
+    let reader = new FileReader();
+    reader.onload = function(event) {
+        try {
+            db = JSON.parse(event.target.result);
+            guardar();
+            alert("Respaldo cargado con éxito.");
+        } catch (err) {
+            alert("Error al importar el archivo. Formato no válido.");
+        }
+    };
+    reader.readAsText(e.target.files[0]);
+}
+
+function borrarTodo() {
+    if (confirm("⚠️ ATENCIÓN: ¿Seguro que desea BORRAR TODA LA BASE DE DATOS? Se perderán todos los datos cargados.")) {
+        localStorage.removeItem(CLAVE);
+        location.reload();
+    }
+}
+
+function actualizarTodo() {
+    document.getElementById("totalAlumnos").innerText = db.alumnos.length;
+    document.getElementById("trayectoriasOk").innerText = db.alumnos.filter(x => x.estado === "sostenida").length;
+    document.getElementById("trayectoriasWarn").innerText = db.alumnos.filter(x => x.estado === "seguimiento").length;
+    document.getElementById("trayectoriasBad").innerText = db.alumnos.filter(x => x.estado === "dificultades").length;
+    
+    mostrarInstituciones();
+    actualizarFiltroInstituciones();
+    actualizarFiltroCursos();
+    cargarSelectsAlumnos();
+    mostrarAlumnos();
+    mostrarAsistencia();
+    mostrarAdeudadas();
+    mostrarTutorias();
+}
+
+// Inicialización
+actualizarTodo();
+</script>
+</body>
+</html>
